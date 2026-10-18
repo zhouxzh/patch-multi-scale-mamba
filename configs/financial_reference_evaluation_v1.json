@@ -1,0 +1,62 @@
+{
+  "protocol_version": "financial_reference_evaluation_v1",
+  "frozen_on": "2026-08-09",
+  "purpose": "Retrospective, protocol-matched evaluation of the selected regime-gated forecaster against audited financial reference baselines.",
+  "evidence_boundary": {
+    "legacy_baselines": "The 2023-01-01 through 2026-06-30 targets were previously opened by financial_confirmatory_v1. Retain the records only after audit.",
+    "candidates": "RegimeGatedMamba and MultiScalePatchMamba were selected before this retrospective comparison. Their results are not an untouched test evaluation.",
+    "selection_evidence": "RegimeGatedMamba was selected on the 2022 merge gate. Its gate evidence is separate from this retrospective comparison."
+  },
+  "base_protocol": {
+    "path": "reproducibility/financial_reference_evaluation_v1/protocol/financial_confirmatory_source.json",
+    "protocol_version": "financial_confirmatory_v1",
+    "protocol_sha256": "1b1a8d94847ab2296dec0db9a5cbe596836aae15fd8e7d88c1e4082e178d5963",
+    "training_manifest": "data/financial/manifests/training_datasets.json",
+    "legacy_final_summary": "backup/results/financial_confirmatory/final_runs.json",
+    "legacy_run_root": "backup/results/financial_confirmatory/runs",
+    "horizons": [1, 5, 20, 60, 120, 252],
+    "seeds": [2023, 2024, 2025, 2026, 2027]
+  },
+  "candidate_parameter_selection_snapshot": "reproducibility/financial_reference_evaluation_v1/candidate_selection",
+  "candidates": {
+    "RegimeGatedMamba": {
+      "source_model_id": "PMSV5_R6",
+      "public_name": "Regime-Gated Mamba",
+      "runtime_model": "RegimeGatedMamba",
+      "role": "proposed",
+      "parameter_overrides": {
+        "pms_branch_mode": "regime_linear",
+        "d_model": 64,
+        "d_ff": 128,
+        "d_state": 8,
+        "e_layers": 1,
+        "ms_use_decomp": 0,
+        "ms_fusion": "mean",
+        "forecast_head": "persistence_change",
+        "change_gate_regularization": 0.0,
+        "pms_change_scale": 1.0,
+        "pms_regime_channel_gate": 0,
+        "pms_regime_individual_linear": 1
+      }
+    },
+    "MultiScalePatchMamba": {
+      "source_model_id": "PMSV3_B0",
+      "public_name": "Multi-Scale Patch Mamba",
+      "runtime_model": "MultiScalePatchMamba",
+      "role": "ablation",
+      "parameter_overrides": {
+        "forecast_head": "level",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.0,
+        "change_gate_regularization": 0.0
+      }
+    }
+  },
+  "release_data_policy": {
+    "raw_provider_archives": "exclude",
+    "cross_asset_processed_snapshot": "exclude_pending_source_rights_review",
+    "crypto_processed_snapshot": "exclude_pending_provider_terms_review",
+    "fx_processed_snapshot": "may_include_with_source_citation",
+    "yields_processed_snapshot": "may_include_with_source_citation"
+  }
+}

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "patch-multi-scale-mamba"
+version = "0.1.0"
+description = "Standalone PMS-Mamba research runtime and reproducibility scaffold"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+runtime = [
+  "torch>=2.1",
+  "mamba-ssm>=2.0",
+]
+research = [
+  "pandas>=2.0",
+  "scipy>=1.10",
+  "optuna>=3.0",
+]
+
+[project.scripts]
+pms-mamba = "pms_mamba.cli:main"
+
+[tool.setuptools]
+packages = ["pms_mamba"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

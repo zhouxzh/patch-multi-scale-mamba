@@ -1,0 +1,75 @@
+{
+  "protocol_version": "financial_mamba_rerun_v1",
+  "purpose": "Retrospective, protocol-matched rerun of all trainable Mamba-family models with retained checkpoints and forecast artifacts.",
+  "evidence_status": "retrospective_protocol_matched",
+  "base_protocol": {
+    "path": "reproducibility/financial_reference_evaluation_v1/protocol/financial_confirmatory_source.json",
+    "training_manifest": "data/financial/manifests/training_datasets.json",
+    "horizons": [1, 5, 20, 60, 120, 252],
+    "seeds": [2023, 2024, 2025, 2026, 2027]
+  },
+  "selection_snapshot": "reproducibility/financial_reference_evaluation_v1/candidate_selection",
+  "selection_search_space_prefix": "pms_v3",
+  "training": {
+    "train_epochs": 10,
+    "patience": 3,
+    "num_workers": 0,
+    "loss": "MSE",
+    "horizon_weighting": "balanced"
+  },
+  "models": {
+    "RegimeGatedMamba": {
+      "source_model_id": "PMSV5_R6",
+      "selection_model": "PMS_Mamba-PD",
+      "runtime_model": "RegimeGatedMamba",
+      "role": "proposed",
+      "parameter_overrides": {
+        "pms_branch_mode": "regime_linear",
+        "d_model": 64,
+        "d_ff": 128,
+        "d_state": 8,
+        "e_layers": 1,
+        "ms_use_decomp": 0,
+        "ms_fusion": "mean",
+        "forecast_head": "persistence_change",
+        "change_gate_regularization": 0.0,
+        "pms_change_scale": 1.0,
+        "pms_regime_channel_gate": 0,
+        "pms_regime_individual_linear": 1
+      }
+    },
+    "MultiScalePatchMamba": {
+      "source_model_id": "PMSV3_B0",
+      "selection_model": "PMS_Mamba-PD",
+      "runtime_model": "MultiScalePatchMamba",
+      "role": "ablation",
+      "parameter_overrides": {
+        "forecast_head": "level",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.0,
+        "change_gate_regularization": 0.0
+      }
+    },
+    "InvertedMamba": {
+      "source_model_id": "S_Mamba",
+      "selection_model": "S_Mamba",
+      "runtime_model": "InvertedMamba",
+      "role": "baseline",
+      "parameter_overrides": {}
+    },
+    "DecompositionMamba": {
+      "source_model_id": "NS_Mamba-D",
+      "selection_model": "NS_Mamba-D",
+      "runtime_model": "DecompositionMamba",
+      "role": "baseline",
+      "parameter_overrides": {}
+    },
+    "MultiScaleDecompositionMamba": {
+      "source_model_id": "MS_Mamba-MD",
+      "selection_model": "MS_Mamba-MD",
+      "runtime_model": "MultiScaleDecompositionMamba",
+      "role": "baseline",
+      "parameter_overrides": {}
+    }
+  }
+}

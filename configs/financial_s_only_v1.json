@@ -1,0 +1,29 @@
+{
+  "protocol_version": "financial_s_only_retrospective_v1",
+  "purpose": "Unified S-only retrospective financial release with retained checkpoints and forecasts.",
+  "evidence_status": "retrospective_protocol_matched",
+  "base_protocol": {
+    "path": "reproducibility/financial_s_only_v1/protocol.json",
+    "training_manifest": "reproducibility/financial_s_only_v1/training_datasets.json",
+    "horizons": [1, 5, 20, 60, 120, 252],
+    "seeds": [2023, 2024, 2025, 2026, 2027]
+  },
+  "selection_snapshot": "reproducibility/financial_s_only_v1/selection",
+  "selection_file": "mamba_best_params.json",
+  "selection_search_space_prefix": "narrow_v2_financial_confirmatory_v1",
+  "training": {"train_epochs": 10, "patience": 3, "num_workers": 0, "loss": "MSE", "horizon_weighting": "balanced"},
+  "models": {
+    "RegimeGatedMamba": {"source_model_id": "PMSV5_R6", "selection_model": "PMS_Mamba-PD", "selection_file": "mamba_best_params.json", "role": "proposed", "parameter_overrides": {"pms_branch_mode": "regime_linear", "d_model": 64, "d_ff": 128, "d_state": 8, "e_layers": 1, "ms_use_decomp": 0, "ms_fusion": "mean", "forecast_head": "persistence_change", "change_gate_regularization": 0.0, "pms_change_scale": 1.0, "pms_regime_channel_gate": 0, "pms_regime_individual_linear": 1, "pms_regime_disable_gate": 0}},
+    "UngatedRegimeLinearMamba": {"source_model_id": "PMSV5_R6", "selection_model": "PMS_Mamba-PD", "selection_file": "mamba_best_params.json", "role": "ablation", "parameter_overrides": {"pms_branch_mode": "regime_linear", "d_model": 64, "d_ff": 128, "d_state": 8, "e_layers": 1, "ms_use_decomp": 0, "ms_fusion": "mean", "forecast_head": "persistence_change", "change_gate_regularization": 0.0, "pms_change_scale": 1.0, "pms_regime_channel_gate": 0, "pms_regime_individual_linear": 1, "pms_regime_disable_gate": 1}},
+    "MultiScalePatchMamba": {"source_model_id": "PMSV3_B0", "selection_model": "PMS_Mamba-PD", "selection_file": "mamba_best_params.json", "role": "ablation", "parameter_overrides": {"forecast_head": "level", "pms_branch_mode": "multiscale", "increment_loss_weight": 0.0, "change_gate_regularization": 0.0}},
+    "MultiScaleDecompositionMamba": {"source_model_id": "MS_Mamba-MD", "selection_model": "MS_Mamba-MD", "selection_file": "mamba_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "InvertedMamba": {"source_model_id": "S_Mamba", "selection_model": "S_Mamba", "selection_file": "mamba_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "DecompositionMamba": {"source_model_id": "NS_Mamba-D", "selection_model": "NS_Mamba-D", "selection_file": "mamba_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "DLinear": {"source_model_id": "DLinear", "selection_model": "DLinear", "selection_file": "baseline_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "NLinear": {"source_model_id": "NLinear", "selection_model": "NLinear", "selection_file": "baseline_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "PatchTST": {"source_model_id": "PatchTST", "selection_model": "PatchTST", "selection_file": "baseline_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "TimesNet": {"source_model_id": "TimesNet", "selection_model": "TimesNet", "selection_file": "baseline_best_params.json", "role": "baseline", "parameter_overrides": {}},
+    "iTransformer": {"source_model_id": "iTransformer", "selection_model": "iTransformer", "selection_file": "baseline_best_params.json", "role": "baseline", "parameter_overrides": {}}
+  },
+  "deterministic_models": ["LastValue", "RandomWalkDrift", "ARIMA"]
+}

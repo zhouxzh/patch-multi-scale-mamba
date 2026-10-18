@@ -1,0 +1,12 @@
+{
+  "architecture_id": "pms_mamba",
+  "repository_role": "standalone research runtime",
+  "source_repository": "https://gitee.com/quantumtouchfish/nonstationary-mamba.git",
+  "source_commit": "b5dc67d",
+  "snapshot_source": "programs/pms_mamba/source",
+  "historical_protocol": "configs/pms_mamba_v3.json",
+  "historical_protocol_version": "pms_mamba_v3_20260804a",
+  "evidence_boundary": "retrospective PMS-Mamba evidence; SAPR runtime is intentionally excluded",
+  "data_policy": "raw data, checkpoints, predictions and transient outputs remain outside Git",
+  "remote": null
+}

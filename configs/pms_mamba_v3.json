@@ -1,0 +1,183 @@
+{
+  "protocol_version": "pms_mamba_v3_20260804a",
+  "frozen_on": "2026-08-04",
+  "objective": "minimize_task_balanced_path_rmsse",
+  "gpu_budget_hours": 96,
+  "evidence_boundary": {
+    "development": "2021 validation targets",
+    "merge_gate": "2022 validation targets, opened once after development selection",
+    "prohibited_for_selection": "financial 2023-01-01 through 2026-06-30",
+    "previously_opened_robustness": ["gld", "exchange", "weather"],
+    "untouched_external": ["etth1", "etth2", "ettm1", "ettm2", "electricity", "traffic"]
+  },
+  "development_splits": {
+    "train_end": "2020-12-31",
+    "validation_start": "2021-01-01",
+    "validation_end": "2021-12-31",
+    "test_start": "2022-01-01",
+    "test_end": "2026-06-30"
+  },
+  "merge_gate_splits": {
+    "train_end": "2021-12-31",
+    "validation_start": "2022-01-01",
+    "validation_end": "2022-12-31",
+    "test_start": "2023-01-01",
+    "test_end": "2026-06-30"
+  },
+  "tasks": [
+    "financial_cross_asset_ms",
+    "financial_cross_asset_s",
+    "financial_crypto_ms",
+    "financial_crypto_s",
+    "financial_fx_ms",
+    "financial_fx_s",
+    "financial_yields_ms",
+    "financial_yields_s"
+  ],
+  "horizons": [1, 5, 20, 60, 120, 252],
+  "selection_horizons": [1, 5, 20, 60, 120],
+  "deferred_financial_diagnostic_horizons": [252],
+  "selection_horizon_rationale": "A single pre-test calendar year contains fewer than 252 complete financial rows. Horizon 252 is therefore excluded from V3 financial selection rather than crossing the chronological evidence boundary; longer-horizon transfer is evaluated on untouched external panels.",
+  "term_groups": {
+    "short": [1, 5],
+    "middle": [20, 60],
+    "long": [120, 252]
+  },
+  "hpo": {
+    "models": ["S_Mamba", "NS_Mamba-D", "MS_Mamba-MD", "PMS_Mamba-PD"],
+    "trials_per_model_task": 24,
+    "top_k_validation_replays": 3,
+    "calibration_horizons": [5, 60, 120],
+    "seed": 20260804,
+    "train_epochs": 10,
+    "patience": 3,
+    "search_space_version": "pms_v3"
+  },
+  "screen": {
+    "seeds": [2023, 2024, 2025],
+    "configs": {
+      "PMSV3_B0": {
+        "forecast_head": "level",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.0,
+        "change_gate_regularization": 0.0
+      },
+      "PMSV3_B1": {
+        "forecast_head": "residual",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.0,
+        "change_gate_regularization": 0.0
+      },
+      "PMSV3_C1": {
+        "forecast_head": "cumulative",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.1,
+        "change_gate_regularization": 0.0
+      },
+      "PMSV3_C2": {
+        "forecast_head": "persistence_change",
+        "pms_branch_mode": "multiscale",
+        "increment_loss_weight": 0.0,
+        "change_gate_regularization": 0.01
+      }
+    },
+    "dual_resolution_candidate": {
+      "config_id": "PMSV3_C3",
+      "parent_selection": "lower mean balanced RMSSE of PMSV3_C1 and PMSV3_C2; runtime if absolute difference is below 0.2 percent",
+      "pms_branch_mode": "dual_resolution",
+      "pms_fine_patch_len": 8,
+      "pms_fine_stride": 4,
+      "pms_coarse_patch_len": 32,
+      "pms_coarse_stride": 16
+    }
+  },
+  "promotion": {
+    "seeds": [2023, 2024, 2025, 2026, 2027],
+    "minimum_balanced_rmsse_improvement_fraction": 0.02,
+    "minimum_improved_tasks": 5,
+    "maximum_term_degradation_fraction": 0.03,
+    "must_beat": ["retuned_pms_b0", "strongest_retuned_non_pms_mamba"],
+    "runtime_reference": "TimesNet",
+    "runtime_rule": "median matched inference latency must be lower"
+  },
+  "external": {
+    "input_modes": ["S", "M"],
+    "seeds": [2023, 2024, 2025],
+    "learned_models": [
+      "PMS_Mamba-V3",
+      "PMS_Mamba-B0",
+      "strongest_non_pms_mamba",
+      "NLinear",
+      "PatchTST",
+      "TimesNet"
+    ],
+    "statistical_reference": "Last-value",
+    "architecture_tuning_on_external_data": false
+    ,
+    "fixed_recipes": {
+      "mamba_common": {
+        "seq_len": 336,
+        "d_model": 64,
+        "d_ff": 128,
+        "d_state": 16,
+        "e_layers": 1,
+        "dropout": 0.1,
+        "batch_size": 16,
+        "learning_rate": 0.0002,
+        "moving_avg": 25,
+        "use_norm": 1
+      },
+      "PMS_Mamba-B0": {
+        "forecast_head": "level",
+        "pms_branch_mode": "multiscale",
+        "ms_scales": [1, 2, 4],
+        "ms_fusion": "mean",
+        "ms_use_decomp": 1,
+        "patch_len": 8,
+        "stride": 4,
+        "pms_min_patch_tokens": 4
+      },
+      "NLinear": {
+        "seq_len": 336,
+        "batch_size": 64,
+        "learning_rate": 0.005,
+        "individual": false,
+        "factor": 1
+      },
+      "PatchTST": {
+        "seq_len": 336,
+        "d_model": 128,
+        "d_ff": 512,
+        "e_layers": 2,
+        "patch_len": 16,
+        "stride": 8,
+        "batch_size": 16,
+        "learning_rate": 0.0003,
+        "factor": 3
+      },
+      "TimesNet": {
+        "seq_len": 336,
+        "d_model": 32,
+        "d_ff": 128,
+        "e_layers": 2,
+        "top_k": 5,
+        "num_kernels": 6,
+        "batch_size": 16,
+        "learning_rate": 0.0001,
+        "factor": 3
+      }
+    }
+  },
+  "profiling": {
+    "warmup_iterations": 20,
+    "measured_iterations": 100,
+    "batch_size": 32,
+    "precision": "float32"
+  },
+  "budget_allocation_hours": {
+    "hpo": 28,
+    "structural_screen": 24,
+    "merge_gate_and_profile": 12,
+    "external_evaluation": 32
+  }
+}
